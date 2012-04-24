@@ -11,4 +11,5 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  rack
   sinatra
