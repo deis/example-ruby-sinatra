@@ -1,4 +1,4 @@
-sinatra-mongodb-blog
-====================
+ruby-sinatra-helloworld
+=======================
 
-Sinatra/MongoDB Blog example for use with OpDemand
+Ruby/Sinatra sample application for use with OpDemand
