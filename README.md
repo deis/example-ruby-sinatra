@@ -31,7 +31,7 @@ To use a Ruby application with OpDemand, you will need to conform to 3 basic req
  * Use **Foreman** to manage processes
  * Use **Environment Variables** to manage configuration
 
-If you're deploying the example application, it already conforms to these requirements.  If you're in a rush, skip to [Create a Platform](#create-a-new-platform).
+If you're deploying the example application, it already conforms to these requirements.  If you're in a rush, skip to [Create a Platform](#create).
 
 ### Use Bundler to manage dependencies
 
@@ -39,7 +39,7 @@ On every deploy action, OpDemand will run a `bundle install --deployment` on all
 
 Manage your bundler dependencies by editing the `Gemfile` in the root of your application repository.  Here is an example Gemfile:
 
-    source 'http://rubygems.org'
+    . 'http://rubygems.org'
     gem 'sinatra'
     gem 'rack'
 
@@ -72,8 +72,8 @@ The same is true for external services like databases, caches and queues.  Here 
     database_port = ENV["DATABASE_PORT"] || 27017
     connection = Mongo::Connection.new(database_host, database_port)
 
-Create a new Platform
----------------------
+<h2 id="create">Create a new Platform </h2>
+
 Use the `opdemand list` command to list the available infrastructure templates:
 
 	$ opdemand list | grep ruby
