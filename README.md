@@ -39,7 +39,7 @@ On every deploy action, OpDemand will run a `bundle install --deployment` on all
 
 Manage your bundler dependencies by editing the `Gemfile` in the root of your application repository.  Here is an example Gemfile:
 
-    . 'http://rubygems.org'
+    source 'http://rubygems.org'
     gem 'sinatra'
     gem 'rack'
 
