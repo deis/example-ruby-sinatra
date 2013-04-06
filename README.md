@@ -102,7 +102,7 @@ A typical application stack includes:
 
 ## Deploy the Environment
 
-To deploy this application stack to EC2, press the green deploy button on the environment toolbar.
+To deploy this application stack, press the green deploy button on the environment toolbar.
 
 ![Deploy your environment](http://www.opdemand.com/wp-content/uploads/2013/03/Screen-Shot-2013-03-27-at-1.04.35-PM.png)
 
@@ -110,38 +110,35 @@ To deploy this application stack to EC2, press the green deploy button on the en
 
 OpDemand provides reasonable defaults, but you'll want to review a few configuration values:
 
-* Check the default EC2 Regions, Zones and Instance Types
-* Add your public key to *SSH Authorized Keys* so you can SSH into any Instances
-* Make sure the *Repository URL, Revision and Private Key* are correct for your application
+* Check the default *Regions*, *Zones* and *Instance Types*
+* Add your public key to *SSH Authorized Keys* so you can SSH into Instances
+* Make sure the *Repository URL* and *Repository Revision* are correct for your application
+* If your app is in a private GitHub repository, click **Create Deploy Key** to have OpDemand install a secure deploy key using the GitHub API
 
-If your application resides in a private GitHub repository, click **Create Deploy Key** to have OpDemand automatically install a secure deploy key using the GitHub API.
-
-### Save & Continue
-
-Once you've reviewed and modified the required configuration, press **Save & Continue** to save the configuration and initiate your first deploy.
+Once you've reviewed and modified the required configuration, press **Save & Continue** to initiate your first deploy.
 
 ### Wait until Active
 
-OpDemand will now orchestrate the deployment of your application stack.  Once the environment has an **Active** status, your application should be good to go.  However, this can take a while depending on the cloud provider, service type and size, and the build/deploy scripts (are you compiling something?).  Grab some coffee and:
+OpDemand will now orchestrate the deployment of your application stack to your cloud providers.  Once the environment has an **Active** status, your application should be good to go.
 
-* Watch the Key Pair and Security Group build, deploy and become **Active**
-* Watch the Instance build, deploy and become **Active** (this takes a few minutes)
-* Watch the Load Balancer build, deploy and become **Active**
+This can take a while depending on the cloud provider, service types, instance sizes and the build/deploy scripts (are you compiling something?).  While you wait, grab some coffee and:
 
-While you wait for the Instance to become active, click into the Instance to watch real-time log feedback.
+* Watch the Key Pairs and Security Groups build, deploy and become **Active**
+* Watch the Instances build, deploy and become **Active** (this takes a few minutes, check out the real-time log feedback)
+* Watch the Load Balancers build, deploy and become **Active**
 
 ### Troubleshooting
 
-It's not uncommon to experience errors or warnings during deploys.  If you get stuck, on any error message you can click **Report This** to [open a ticket](https://desk.opdemand.com/) with the OpDemand help desk.
+It's not uncommon to experience errors or warnings during deploys.  If you get stuck on an error you can click **Report This** to [open a ticket](https://desk.opdemand.com/) with the OpDemand help desk.
 
-* For *Warnings*, try re-deploying to bring the service back to Active status
-* For *Cloud Provider API* Errors, check the service's primary configuration fields
-* For *SSH Key* Errors, make sure Deployment configuration sections contain valid SSH private keys
-* For *SSH Return Code* Errors, SSH into an instance and make sure the Build & Deploy scripts execute successfully
+* For *Cloud Provider Errors*, check the service's primary configuration fields
+* For *SSH Key Warnings*, make sure Deployment configuration sections contain valid SSH private keys
+* For *SSH Return Code Warnings*, SSH into the instance and make sure the Build & Deploy scripts execute successfully
+* For *Other Warnings*, try re-deploying to bring the service back to active status
 
 ###### SSH Access
 
-Click the **SSH** button on the toolbar to SSH into Instances.  If you didn't add your SSH key initially, you can always modify SSH keys later, Save the new configuration and **Deploy** again to update the Instance.
+Click the **SSH** button on the toolbar to SSH into Instances.  If you didn't add your SSH key initially, you can always modify SSH keys later, save the new configuration and **Deploy** again to update the Instance.
 
 ![SSH into your Instance](http://www.opdemand.com/wp-content/uploads/2013/03/Screen-Shot-2013-03-27-at-1.10.19-PM.png)
 
@@ -155,12 +152,12 @@ For the example application you should see: *Powered by OpDemand*
 
 ## Update your Application
 
-As you make changes to your application or deployment automation:
+As you make changes to your application or deployment code:
 
 1. **Push** the code to GitHub
 2. **Deploy** the environment
 
-OpDemand will use the latest deployment automation to update configuration, pull down source code from GitHub, install dependencies, re-package your application and restart services where necessary.
+OpDemand will use the latest environment configuration to update cloud services, SSH into instances, pull down source code from GitHub, install dependencies, re-package your application and restart services where necessary.
 
 If you want to integrate OpDemand into your command-line workflow, `opdemand deploy` can also be used to trigger deploys.  See [Using the OpDemand Command-Line Interface](http://www.opdemand.com/docs/) more details.
 
