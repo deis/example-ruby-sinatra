@@ -1,133 +1,194 @@
-Ruby Quick Start Guide
-======================
+# Ruby Quick Start Guide
 
-This guide will walk you through deploying a Ruby application on AWS using OpDemand.
+This guide will walk you through deploying a Ruby application to Amazon EC2 using OpDemand.
 
-Prerequisites
---------------
-* A [free OpDemand account](https://app.opdemand.com/signup) with
-  * Valid AWS credentials
-  * Linked GitHub account
-* The OpDemand Command Line Interface
-* A Ruby application that is **hosted on GitHub**
+## Prerequisites
 
-Clone your Application
-----------------------
-The simplest way to get started is by forking OpDemand's sample application located at:
-<https://github.com/opdemand/example-ruby-sinatra>
+* An [OpDemand account](http://www.opdemand.com/nodejs/) that is [linked to your GitHub account](http://www.opdemand.com/docs/about-github-integration/)
+* An [OpDemand environment](http://www.opdemand.com/how-it-works/) that contains valid [AWS credentials](http://www.opdemand.com/docs/adding-aws-creds/)
 
-After forking the project, clone it to your local workstation using the SSH-style URL:
+## Setup your workstation
 
-    $ git clone git@github.com:mygithubuser/example-ruby-sinatra.git example-ruby-sinatra
+* Install a [Ruby](http://www.ruby-lang.org/en/downloads/) runtime (we recommend Ruby 1.9.3)
+* Install [RubyGems](http://rubygems.org/pages/download) to get the `gem` command on your workstation
+* Install [Foreman](http://ddollar.github.com/foreman/) with `gem install foreman`
+
+## Clone your Application
+
+The simplest way to get started is by forking OpDemand's sample application located at <https://github.com/opdemand/example-ruby-sinatra>.  After forking the project, clone it to your local workstation using the SSH-style URL:
+
+	$ git clone git@github.com:mygithubuser/example-ruby-sinatra.git
     $ cd example-ruby-sinatra
 
-If you want to use an existing application, no problem -- just make sure you've cloned it from GitHub.
+If you want to use an existing application instead, no problem.
 
-Prepare your Application
-------------------------
+## Prepare your Application
+
 To use a Ruby application with OpDemand, you will need to conform to 3 basic requirements:
 
- * Use [**bundler**](http://gembundler.com/) to manage dependencies
- * Use [**foreman**](http://ddollar.github.com/foreman/) to manage processes
- * Use **Environment Variables** to manage configuration
+ 1. Use [Bundler](http://gembundler.com/) to manage dependencies
+ 2. Use [Foreman](http://ddollar.github.com/foreman/) to manage processes
+ 3. Use [Environment Variables](https://help.ubuntu.com/community/ EnvironmentVariables) to manage configuration inside your application
 
-If you're deploying the example application, it already conforms to these requirements.  If you're in a rush, skip to [Create a new Service](#create-a-new-service).
+If you're deploying the example application, it already conforms to these requirements.
 
-### Use Bundler to manage dependencies
+#### 1. Use Bundler to manage dependencies
 
-On every deploy action, OpDemand will run a `bundle install --deployment` on all application workers to ensure dependencies are up to date and placed in `vendor/bundle`.
+Every time you deploy, OpDemand will run a `bundle --deployment` on all application instances to ensure dependencies are up to date.  Bundler requires that you explicitly declare your dependencies using a [Gemfile](http://gembundler.com/v1.3/gemfile.html).  Here is a very basic example:
 
-Manage your bundler dependencies by editing the `Gemfile` in the root of your application repository.  Here is an example Gemfile:
+~~~
+source 'http://rubygems.org'
+ruby '1.9.3'
+gem 'rack'
+gem 'sinatra'
+~~~
 
-    source 'http://rubygems.org'
-    gem 'sinatra'
-    gem 'rack'
+Install your dependencies on your local workstation using a `bundle install`:
 
-Use `bundle install` to install the required dependencies and generate a `Gemfile.lock` which will freeze dependency versions in preparation for deployment.
+~~~
+$ bundle install
+Fetching gem metadata from http://rubygems.org/..........
+Fetching gem metadata from http://rubygems.org/..
+Resolving dependencies...
+Installing rack (1.5.2) 
+Installing rack-protection (1.5.0) 
+Using tilt (1.3.6) 
+Installing sinatra (1.4.2) 
+Using bundler (1.3.4) 
+Your bundle is complete!
+Use `bundle show [gemname]` to see where a bundled gem is installed.
+~~~
 
-### Use Foreman to manage processes
+If your dependencies require any system packages, you can install those later by specifying a list of custom packages in the Instance configuration or by customizing the deploy script to install your own packages.
 
-OpDemand uses a Foreman Procfile to manage the processes that serve up your application.  The `Procfile` is how you define the command(s) used to run your application.  Here is an example `Procfile` that executes a ruby web server using `bundle exec` (highly recommended):
+#### 2. Use Foreman to manage processes
 
-	web: bundle exec ruby web.rb -p $APPLICATION_PORT
+OpDemand uses [Foreman](http://ddollar.github.com/foreman/) to manage the processes that serve up your application.  Foreman relies on a `Procfile` that lives in the root of your repository.  This is where you define the command(s) used to run your application.  Here is an example `Procfile`:
 
-This tells OpDemand to run one web process.  You can test this out locally by running setting the `APPLICATION_PORT` environment variable and calling `foreman start`.
+~~~
+web: bundle exec ruby web.rb -p $PORT
+~~~
 
-    $ export APPLICATION_PORT=8080
-	$ foreman start
-    13:19:15 web.1     | started with pid 27022
-    13:19:16 web.1     | [2012-05-10 13:19:16] INFO  WEBrick 1.3.1
-    13:19:16 web.1     | [2012-05-10 13:19:16] INFO  ruby 1.9.3 (2012-04-20) [x86_64-darwin11.3.0]
-    13:19:16 web.1     | [2012-05-10 13:19:16] INFO  WEBrick::HTTPServer#start: pid=27022 port=5000
+This tells OpDemand to run web application workers using the command `node server.js`.  You can test this locally by running `foreman start`.
 
-### Use Environment Variables to manage configuration
+~~~
+$ foreman start
+10:06:14 web.1  | started with pid 63945
+10:06:15 web.1  | [2013-04-06 10:06:15] INFO  WEBrick 1.3.1
+10:06:15 web.1  | [2013-04-06 10:06:15] INFO  ruby 1.9.3 (2012-02-16) [x86_64-darwin12.3.0]
+10:06:15 web.1  | == Sinatra/1.4.2 has taken the stage on 5000 for development with backup from WEBrick
+10:06:15 web.1  | [2013-04-06 10:06:15] INFO  WEBrick::HTTPServer#start: pid=63945 port=5000
+~~~
 
-OpDemand uses environment variables to manage your application's configuration.  For example, the application listener must use the value of the `APPLICATION_PORT` environment variable.  The following code snippets demonstrates how this can work inside your application:
+#### 3. Use Environment Variables to manage configuration
 
-	port = ENV["APPLICATION_PORT"] || 5000    # fallback to 5000
+OpDemand uses environment variables to manage your application's configuration.  For example, your application listener must use the value of the `PORT` environment variable.  The following code snippet demonstrates how this can work inside your application:
 
-The same is true for external services like databases, caches and queues.  Here is an example in that shows how to connect to a MongoDB database using the `DATABASE_HOST` and `DATABASE_PORT` environment variables:
+~~~
+require 'sinatra'
+set :port, ENV["PORT"] || 5000
+~~~
 
-    database_host = ENV["DATABASE_HOST"] || "localhost"
-    database_port = ENV["DATABASE_PORT"] || 27017
-    connection = Mongo::Connection.new(database_host, database_port)
+The same is true for external services like databases, caches and queues.  Here is an example of how to connect to a MySQL database using environment variables:
 
-<a id="create-a-new-service"></a>
-Create a new Service
----------------------
-Use the `opdemand list` command to list the available infrastructure templates:
+~~~
+ActiveRecord::Base.establish_connection(
+  adapter: "mysql2", 
+  host: env["MYSQL_HOST"] || settings.db_host,
+  database: env["MYSQL_DBNAME"] || settings.db_name,
+  username: env["MYSQL_USERNAME"] || settings.db_username,
+  password: env["MYSQL_PASSWORD"] || settings.db_password)
+~~~
 
-	$ opdemand list | grep ruby
-    app/ruby/1node: Ruby Application (1-node)
-    app/ruby/2node: Ruby Application (2-node with ELB)
-    app/ruby/4node: Ruby Application (4-node with ELB)
-    app/ruby/Nnode: Ruby Application (Auto Scaling)
+## Add a Ruby Stack to your Environment
 
-Use the `opdemand create` command to create a new service based on one of the templates listed.  To create an `appruby/1node` service with `app` as its handle/nickname.
+We now have an application that is ready for deployment, along with an [OpDemand environment](http://www.opdemand.com/how-it-works/) that includes [AWS credentials](http://www.opdemand.com/docs/adding-aws-creds/).  Let's add a basic Ruby stack to host our example application:
 
-	$ opdemand create app --template=app/ruby/1node
+* Click the **Add/Discover Services** button
+* Select the **Ruby** stack and press **Save**
 
-Configure the Service
-----------------------
-To quickly configure a service from the command-line use `opdemand config [handle] --repository=detect`.  This will attempt to detect and install repository configuration including:
+A typical application stack includes:
 
-* Detecting your GitHub repository URL, project and username
-* Generating and installing a secure SSH Deploy Key
+* An **EC2 Load Balancer** used to route traffic to your EC2 instances
+* An **EC2 Instance** used to host the application behind [Nginx](http://wiki.nginx.org/Main)
+* An **EC2 Security Group** used as a virtual firewall inside EC2
+* An **EC2 Key Pair** used for deployment automation
 
-More detailed configuration can be done using:
+## Deploy the Environment
 
-	$ opdemand config app					   # the entire config wizard (all sections)
-	$ opdemand config app --section=provider   # only the "provider" section
+To deploy this application stack to EC2, press the green deploy button on the environment toolbar.
 
-Detailed configuration changes are best done via the web console, which exposes additional helpers, drop-downs and overrides.
+![Deploy your environment](http://www.opdemand.com/wp-content/uploads/2013/03/Screen-Shot-2013-03-27-at-1.04.35-PM.png)
 
-Start the Service
-------------------
-To start your service use the `opdemand start` command:
+### Specify Required Configuration
 
-	$ opdemand start app
+OpDemand provides reasonable defaults, but you'll want to review a few configuration values.  For a Ruby application, you'll be prompted for:
 
-You will see real-time streaming log output as OpDemand orchestrates the service's infrastructure and triggers the necessary SSH deployments.  Once the service has finished starting you can access its services using an `opdemand show`.
+###### EC2 Instance
 
-    $ opdemand show app
+ * EC2 Region, Zone, & Instance Type
+ * SSH Authorized Keys (optional, used for accessing Instances over SSH)
+ * Git Repository URL (defaults to the example project, or point it to your own)
+ * Git Repository Revision (defaults to master)
+ * Git Repository Key (required for private repositories)
 
-	Application URL (URL used to access this application)
-	http://ec2-23-20-231-188.compute-1.amazonaws.com
+If your application resides in a private GitHub repository, click **Create Deploy Key** to have OpDemand automatically install a secure deploy key using the GitHub API.
 
-Open the URL and you should see "Powered by OpDemand" in your browser.  To check on the status of your services, use the `opdemand status` command:
+###### EC2 Load Balancer, EC2 Security Group & EC2 Key Pair
 
-	$ opdemand status
-	app: Ruby Application (1-node) (status: running)
+ * EC2 Region
+ * Name (auto-generated by default)
 
-Deploy the Service
-----------------------
-As you make changes to your application code, push those to GitHub as you would normally.  When you're ready to deploy those changes, use the `opdemand deploy` command:
+### Save & Continue
 
-	$ opdemand deploy app
+Once you've reviewed and modified the required configuration, press **Save & Continue** to save the configuration and initiate your first deploy.
 
-This will trigger an OpDemand deploy action which will -- among other things -- update configuration settings, pull down the latest source code, install new dependencies and restart services where necessary.
+### Wait until Active
 
+OpDemand will now orchestrate the deployment of your application stack.  Once the environment has an **Active** status, your application should be good to go.  However, this can take a while depending on the cloud provider, service type and size, and the build/deploy scripts (are you compiling something?).  If configuration is correct and scripts execute successfuly
 
-Additional Resources
-====================
-* <http://www.opdemand.com>
+* Watch the Key Pair and Security Group build, deploy and become **Active**
+* Watch the Instance build, deploy and become **Active** (this takes a few minutes)
+* Watch the Load Balancer build, deploy and become **Active** (this takes a bit as well)
+
+While you wait for the Instance to become active, click into the Instance to watch real-time log feedback.
+
+### Troubleshooting
+
+It's not uncommon to experience errors when provisioning new stacks from scratch.  As you work on customizing configuration, you may need to **Destroy** and re-**Deploy** the environment multiple times before the automation works reliably.
+
+* For *Cloud Provider API* Errors, check the service's primary configuration fields
+* For *SSH Key* Errors, make sure Deployment configuration sections contain valid SSH private keys
+* For *SSH Return Code* Errors login to the Instance over SSH and make sure the Build & Deploy scripts execute successfully
+
+###### SSH Access
+
+Click the **SSH** button on the toolbar to SSH into Instances.  If you didn't add your SSH key initially, you can always modify SSH keys later, Save the new configuration and **Deploy** again to update the Instance.
+
+![SSH into your Instance](http://www.opdemand.com/wp-content/uploads/2013/03/Screen-Shot-2013-03-27-at-1.10.19-PM.png)
+
+If you get stuck, on any error message you can click **Report This** to [open a ticket](https://desk.opdemand.com/) with the OpDemand help desk.
+
+## Access your Application
+
+Once your application is active, you can access its [published URLs](http://www.opdemand.com/how-it-works/monitor/) on the Environment's **Monitor** tab.  If you're looking at a service that publishes something, you can jump to the published URL in the upper-right corner of the service:
+
+![Access your application](http://www.opdemand.com/wp-content/uploads/2013/03/Screen-Shot-2013-03-27-at-2.43.09-PM.png)
+
+For the example application you should see: *Powered by OpDemand*
+
+## Update your Application
+
+As you make changes to your application or deployment automation:
+
+1. **Push** the code to GitHub
+2. **Deploy** the environment
+
+OpDemand will use the latest deployment automation to update configuration, pull down source code from GitHub, install dependencies, re-package your application and restart services where necessary.
+
+If you want to integrate OpDemand into your command-line workflow, `opdemand deploy` can also be used to trigger deploys.  See [Using the OpDemand Command-Line Interface](http://www.opdemand.com/docs/) more details.
+
+## Additional Resources
+
+* [OpDemand Documentation](http://www.opdemand.com/docs/)
+* [OpDemand - How It Works](https://www.opdemand.com/how-it-works/)
