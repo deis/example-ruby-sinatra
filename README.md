@@ -36,28 +36,24 @@ If you're deploying the example application, it already conforms to these requir
 
 Every time you deploy, OpDemand will run a `bundle --deployment` on all application instances to ensure dependencies are up to date.  Bundler requires that you explicitly declare your dependencies using a [Gemfile](http://gembundler.com/v1.3/gemfile.html).  Here is a very basic example:
 
-~~~
-source 'http://rubygems.org'
-ruby '1.9.3'
-gem 'rack'
-gem 'sinatra'
-~~~
+    source 'http://rubygems.org'
+    ruby '1.9.3'
+    gem 'rack'
+    gem 'sinatra'
 
 Install your dependencies on your local workstation using `bundle install`:
 
-~~~
-$ bundle install
-Fetching gem metadata from http://rubygems.org/..........
-Fetching gem metadata from http://rubygems.org/..
-Resolving dependencies...
-Installing rack (1.5.2) 
-Installing rack-protection (1.5.0) 
-Using tilt (1.3.6) 
-Installing sinatra (1.4.2) 
-Using bundler (1.3.4) 
-Your bundle is complete!
-Use `bundle show [gemname]` to see where a bundled gem is installed.
-~~~
+    $ bundle install
+    Fetching gem metadata from http://rubygems.org/..........
+    Fetching gem metadata from http://rubygems.org/..
+    Resolving dependencies...
+    Installing rack (1.5.2) 
+    Installing rack-protection (1.5.0) 
+    Using tilt (1.3.6) 
+    Installing sinatra (1.4.2) 
+    Using bundler (1.3.4) 
+    Your bundle is complete!
+    Use `bundle show [gemname]` to see where a bundled gem is installed.
 
 If your dependencies require any system packages, you can install those later by specifying a list of custom packages in the Instance configuration or by customizing the deploy script to install your own packages.
 
@@ -65,40 +61,32 @@ If your dependencies require any system packages, you can install those later by
 
 OpDemand uses [Foreman](http://ddollar.github.com/foreman/) to manage the processes that serve up your application.  Foreman relies on a `Procfile` that lives in the root of your repository.  This is where you define the command(s) used to run your application.  Here is an example `Procfile`:
 
-~~~
-web: bundle exec ruby web.rb -p $PORT
-~~~
+    web: bundle exec ruby web.rb -p $PORT
 
 This tells OpDemand to run web application workers using the command `ruby web.rb -p $PORT` wrapped in a `bundle exec` (highly recommended).  You can test this locally by running `foreman start`.
 
-~~~
-$ foreman start
-10:06:14 web.1  | started with pid 63945
-10:06:15 web.1  | [2013-04-06 10:06:15] INFO  WEBrick 1.3.1
-10:06:15 web.1  | [2013-04-06 10:06:15] INFO  ruby 1.9.3 (2012-02-16) [x86_64-darwin12.3.0]
-10:06:15 web.1  | == Sinatra/1.4.2 has taken the stage on 5000 for development with backup from WEBrick
-10:06:15 web.1  | [2013-04-06 10:06:15] INFO  WEBrick::HTTPServer#start: pid=63945 port=5000
-~~~
+    $ foreman start
+    10:06:14 web.1  | started with pid 63945
+    10:06:15 web.1  | [2013-04-06 10:06:15] INFO  WEBrick 1.3.1
+    10:06:15 web.1  | [2013-04-06 10:06:15] INFO  ruby 1.9.3 (2012-02-16) [x86_64-darwin12.3.0]
+    10:06:15 web.1  | == Sinatra/1.4.2 has taken the stage on 5000 for development with backup from WEBrick
+    10:06:15 web.1  | [2013-04-06 10:06:15] INFO  WEBrick::HTTPServer#start: pid=63945 port=5000
 
 #### 3. Use Environment Variables to manage configuration
 
 OpDemand uses environment variables to manage your application's configuration.  For example, your application listener must use the value of the `PORT` environment variable.  The following code snippet demonstrates how this can work inside your application:
 
-~~~
-require 'sinatra'
-set :port, ENV["PORT"] || 5000
-~~~
+    require 'sinatra'
+    set :port, ENV["PORT"] || 5000
 
 The same is true for external services like databases, caches and queues.  Here is an example of how to connect to a MySQL database using environment variables:
 
-~~~
-ActiveRecord::Base.establish_connection(
-  adapter: "mysql2", 
-  host: env["MYSQL_HOST"] || settings.db_host,
-  database: env["MYSQL_DBNAME"] || settings.db_name,
-  username: env["MYSQL_USERNAME"] || settings.db_username,
-  password: env["MYSQL_PASSWORD"] || settings.db_password)
-~~~
+    ActiveRecord::Base.establish_connection(
+      adapter: "mysql2", 
+      host: env["MYSQL_HOST"] || settings.db_host,
+      database: env["MYSQL_DBNAME"] || settings.db_name,
+      username: env["MYSQL_USERNAME"] || settings.db_username,
+      password: env["MYSQL_PASSWORD"] || settings.db_password)
 
 ## Add a Ruby Stack to your Environment
 
