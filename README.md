@@ -70,6 +70,8 @@ This tells OpDemand to run web application workers using the command `ruby web.r
     10:06:15 web.1  | == Sinatra/1.4.2 has taken the stage on 5000 for development with backup from WEBrick
     10:06:15 web.1  | [2013-04-06 10:06:15] INFO  WEBrick::HTTPServer#start: pid=63945 port=5000
 
+You should now be able to access your application locally at <http://localhost:5000>.
+
 #### 3. Use Environment Variables to manage configuration
 
 OpDemand uses environment variables to manage your application's configuration.  For example, your application listener must use the value of the `PORT` environment variable.  The following code snippet demonstrates how this can work inside your application:
