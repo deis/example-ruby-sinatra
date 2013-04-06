@@ -4,7 +4,7 @@ This guide will walk you through deploying a Ruby application to Amazon EC2 usin
 
 ## Prerequisites
 
-* An [OpDemand account](http://www.opdemand.com/nodejs/) that is [linked to your GitHub account](http://www.opdemand.com/docs/about-github-integration/)
+* An [OpDemand account](http://www.opdemand.com/) that is [linked to your GitHub account](http://www.opdemand.com/docs/about-github-integration/)
 * An [OpDemand environment](http://www.opdemand.com/how-it-works/) that contains valid [AWS credentials](http://www.opdemand.com/docs/adding-aws-creds/)
 
 ## Setup your workstation
@@ -15,12 +15,10 @@ This guide will walk you through deploying a Ruby application to Amazon EC2 usin
 
 ## Clone your Application
 
-The simplest way to get started is by forking OpDemand's sample application located at <https://github.com/opdemand/example-ruby-sinatra>.  After forking the project, clone it to your local workstation using the SSH-style URL:
+If you want to use an existing application, no problem.  You can also fork OpDemand's sample application located at <https://github.com/opdemand/example-ruby-sinatra>.  After forking the project, clone it to your local workstation using the SSH-style URL:
 
 	$ git clone git@github.com:mygithubuser/example-ruby-sinatra.git
     $ cd example-ruby-sinatra
-
-If you want to use an existing application instead, no problem.
 
 ## Prepare your Application
 
@@ -28,7 +26,7 @@ To use a Ruby application with OpDemand, you will need to conform to 3 basic req
 
  1. Use [Bundler](http://gembundler.com/) to manage dependencies
  2. Use [Foreman](http://ddollar.github.com/foreman/) to manage processes
- 3. Use [Environment Variables](https://help.ubuntu.com/community/ EnvironmentVariables) to manage configuration inside your application
+ 3. Use [Environment Variables](https://help.ubuntu.com/community/EnvironmentVariables) to manage configuration inside your application
 
 If you're deploying the example application, it already conforms to these requirements.
 
