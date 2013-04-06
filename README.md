@@ -9,7 +9,7 @@ This guide will walk you through deploying a Ruby application to Amazon EC2 usin
 
 ## Setup your workstation
 
-* Install a [Ruby](http://www.ruby-lang.org/en/downloads/) runtime (we recommend Ruby 1.9.3)
+* Install [Ruby](http://www.ruby-lang.org/en/downloads/) if you haven't already (we recommend Ruby 1.9.3)
 * Install [RubyGems](http://rubygems.org/pages/download) to get the `gem` command on your workstation
 * Install [Foreman](http://ddollar.github.com/foreman/) with `gem install foreman`
 
@@ -43,7 +43,7 @@ gem 'rack'
 gem 'sinatra'
 ~~~
 
-Install your dependencies on your local workstation using a `bundle install`:
+Install your dependencies on your local workstation using `bundle install`:
 
 ~~~
 $ bundle install
@@ -69,7 +69,7 @@ OpDemand uses [Foreman](http://ddollar.github.com/foreman/) to manage the proces
 web: bundle exec ruby web.rb -p $PORT
 ~~~
 
-This tells OpDemand to run web application workers using the command `node server.js`.  You can test this locally by running `foreman start`.
+This tells OpDemand to run web application workers using the command `ruby web.rb -p $PORT` wrapped in a `bundle exec` (highly recommended).  You can test this locally by running `foreman start`.
 
 ~~~
 $ foreman start
@@ -145,21 +145,21 @@ Once you've reviewed and modified the required configuration, press **Save & Con
 
 ### Wait until Active
 
-OpDemand will now orchestrate the deployment of your application stack.  Once the environment has an **Active** status, your application should be good to go.  However, this can take a while depending on the cloud provider, service type and size, and the build/deploy scripts (are you compiling something?).  If configuration is correct and scripts execute successfuly
+OpDemand will now orchestrate the deployment of your application stack.  Once the environment has an **Active** status, your application should be good to go.  However, this can take a while depending on the cloud provider, service type and size, and the build/deploy scripts (are you compiling something?).  Grab some coffee and:
 
 * Watch the Key Pair and Security Group build, deploy and become **Active**
 * Watch the Instance build, deploy and become **Active** (this takes a few minutes)
-* Watch the Load Balancer build, deploy and become **Active** (this takes a bit as well)
+* Watch the Load Balancer build, deploy and become **Active**
 
 While you wait for the Instance to become active, click into the Instance to watch real-time log feedback.
 
 ### Troubleshooting
 
-It's not uncommon to experience errors when provisioning new stacks from scratch.  As you work on customizing configuration, you may need to **Destroy** and re-**Deploy** the environment multiple times before the automation works reliably.
+It's not uncommon to experience errors when provisioning new stacks from scratch.  As you work on customizing configuration, you may need to **Destroy** and **Deploy** the environment multiple times before the automation works reliably.
 
 * For *Cloud Provider API* Errors, check the service's primary configuration fields
 * For *SSH Key* Errors, make sure Deployment configuration sections contain valid SSH private keys
-* For *SSH Return Code* Errors login to the Instance over SSH and make sure the Build & Deploy scripts execute successfully
+* For *SSH Return Code* Errors, SSH into an instance and make sure the Build & Deploy scripts execute successfully
 
 ###### SSH Access
 
