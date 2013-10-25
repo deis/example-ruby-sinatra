@@ -17,9 +17,9 @@ If you do not yet have a controller or a Deis formation, please review the [Deis
 
 ## Clone your Application
 
-If you want to use an existing application, no problem.  You can also use the Deis sample application located at <https://github.com/bengrunfeld/example-ruby-sinatra>.  Clone the example application to your local workstation:
+If you want to use an existing application, no problem.  You can also use the Deis sample application located at <https://github.com/opdemand/example-ruby-sinatra>.  Clone the example application to your local workstation:
 
-	$ git clone https://github.com/bengrunfeld/example-ruby-sinatra.git
+	$ git clone https://github.com/opdemand/example-ruby-sinatra.git
 	$ cd example-ruby-sinatra
 
 ## Prepare your Application
@@ -34,7 +34,7 @@ If you're deploying the example application, it already conforms to these requir
 
 #### 1. Use Bundler to manage dependencies
 
-Every time you deploy, Deis will run a `bundle --deployment` on all application instances to ensure dependencies are up to date.  Bundler requires that you explicitly declare your dependencies using a [Gemfile](http://bundler.io/v1.3/gemfile.html).  Here is a very basic example:
+Bundler requires that you explicitly declare your dependencies using a [Gemfile](http://bundler.io/v1.3/gemfile.html).  Here is a very basic example:
 
 	source 'http://rubygems.org'
 	ruby '1.9.3'
@@ -54,7 +54,6 @@ Install your dependencies on your local workstation using `bundle install`:
 	Your bundle is complete!
 	Use `bundle show [gemname]` to see where a bundled gem is installed.
 
-If your dependencies require any system packages, you can install those later by specifying a list of custom packages in the Instance configuration or by customizing the deploy script to install your own packages.
 
 #### 2. Use Foreman to manage processes
 
@@ -87,13 +86,14 @@ Per the prerequisites, we assume you have access to an existing Deis formation. 
 Use the following command to create an application on an existing Deis formation.
 
 	$ deis create --formation=<formationName> --id=<appName>
-	Creating application... done, created marble-original
+	Creating application... done, created <appName>
 	Git remote deis added    
-	If an ID is not provided, one will be auto-generated for you.
+	
+If an ID is not provided, one will be auto-generated for you.
 
 ## Deploy your Application
 
-Use `git push` to deploy your application.
+Use `git push deis master` to deploy your application.
 
 	$ git push deis master
 	Counting objects: 75, done.
@@ -108,13 +108,13 @@ Once your application has been deployed, use `deis open` to view it in a browser
 
 ## Scale your Application
 
-To scale your application's [Docker](http://docker.io) containers, use `deis scale`.
+To scale your application's [Docker](http://docker.io) containers, use `deis scale` and specify the number of containers for each process type defined in your application's `Procfile`. For example, `deis scale web=8`.
 
 	$ deis scale web=8
 	Scaling containers... but first, coffee!
 	done in 15s
 	
-	=== marble-original Containers
+	=== <appName> Containers
 	
 	--- web: `bundle exec ruby web.rb -p $PORT`
 	web.1 up 2013-10-25T20:24:14.414Z (rubyFormation-runtime-1)
@@ -130,17 +130,15 @@ To scale your application's [Docker](http://docker.io) containers, use `deis sca
 
 Deis applications are configured using environment variables. The example application includes a special `POWERED_BY` variable to help demonstrate how you would provide application-level configuration. 
 
-	$ curl -s http://yourapp.com
+	$ curl -s http://yourapp.yourformation.com
 	Powered by Deis
 	$ deis config:set POWERED_BY=Ruby
-	=== marble-original
+	=== <appName>
 	POWERED_BY: Ruby
-	$ curl -s http://yourapp.com
+	$ curl -s http://yourapp.yourformation.com
 	Powered by Ruby
 
-This method is also how you connect your application to backing services like databases, queues and caches.
-
-To experiment in your application environment, use `deis run` to execute one-off commands against your application.
+`deis config:set` is also how you connect your application to backing services like databases, queues and caches. You can use `deis run` to execute one-off commands against your application for things like database administration, initial application setup and inspecting your container environment.
 
 	$ deis run ls -la
 	total 68
