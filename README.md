@@ -1,11 +1,13 @@
 # Ruby Quick Start Guide
 
-This guide will walk you through deploying a Ruby application to Amazon EC2 using OpDemand.
+This guide will walk you through deploying a Ruby application on Deis.
 
 ## Prerequisites
 
-* An [OpDemand account](http://www.opdemand.com/) that is [linked to your GitHub account](http://www.opdemand.com/docs/about-github-integration/)
-* An [OpDemand environment](http://www.opdemand.com/how-it-works/) that contains valid [AWS credentials](http://www.opdemand.com/docs/adding-aws-creds/)
+* A [User Account](http://docs.deis.io/en/latest/client/register/) on a [Deis Controller](http://docs.deis.io/en/latest/terms/controller/).
+* A [Deis Formation](http://docs.deis.io/en/latest/gettingstarted/concepts/#formations) that is ready to host applications
+
+If you do not yet have a controller or a Deis formation, please review the [Deis installation](http://docs.deis.io/en/latest/gettingstarted/installation/) instructions.
 
 ## Setup your workstation
 
@@ -15,16 +17,16 @@ This guide will walk you through deploying a Ruby application to Amazon EC2 usin
 
 ## Clone your Application
 
-If you want to use an existing application, no problem.  You can also fork OpDemand's sample application located at <https://github.com/opdemand/example-ruby-sinatra>.  After forking the project, clone it to your local workstation using the SSH-style URL:
+If you want to use an existing application, no problem.  You can also use the Deis sample application located at <https://github.com/bengrunfeld/example-ruby-sinatra>.  Clone the example application to your local workstation:
 
-	$ git clone git@github.com:mygithubuser/example-ruby-sinatra.git
-    $ cd example-ruby-sinatra
+	$ git clone https://github.com/bengrunfeld/example-ruby-sinatra.git
+	$ cd example-ruby-sinatra
 
 ## Prepare your Application
 
-To use a Ruby application with OpDemand, you will need to conform to 3 basic requirements:
+To use a Ruby application with Deis, you will need to conform to 3 basic requirements:
 
- 1. Use [Bundler](http://gembundler.com/) to manage dependencies
+ 1. Use [Bundler](http://bundler.io/) to manage dependencies
  2. Use [Foreman](http://ddollar.github.com/foreman/) to manage processes
  3. Use [Environment Variables](https://help.ubuntu.com/community/EnvironmentVariables) to manage configuration inside your application
 
@@ -32,36 +34,35 @@ If you're deploying the example application, it already conforms to these requir
 
 #### 1. Use Bundler to manage dependencies
 
-Every time you deploy, OpDemand will run a `bundle --deployment` on all application instances to ensure dependencies are up to date.  Bundler requires that you explicitly declare your dependencies using a [Gemfile](http://gembundler.com/v1.3/gemfile.html).  Here is a very basic example:
+Every time you deploy, Deis will run a `bundle --deployment` on all application instances to ensure dependencies are up to date.  Bundler requires that you explicitly declare your dependencies using a [Gemfile](http://bundler.io/v1.3/gemfile.html).  Here is a very basic example:
 
-    source 'http://rubygems.org'
-    ruby '1.9.3'
-    gem 'rack'
-    gem 'sinatra'
+	source 'http://rubygems.org'
+	ruby '1.9.3'
+	gem 'sinatra'
+	gem 'rack'
 
 Install your dependencies on your local workstation using `bundle install`:
 
-    $ bundle install
-    Fetching gem metadata from http://rubygems.org/..........
-    Fetching gem metadata from http://rubygems.org/..
-    Resolving dependencies...
-    Installing rack (1.5.2) 
-    Installing rack-protection (1.5.0) 
-    Using tilt (1.3.6) 
-    Installing sinatra (1.4.2) 
-    Using bundler (1.3.4) 
-    Your bundle is complete!
-    Use `bundle show [gemname]` to see where a bundled gem is installed.
+	$ bundle install
+	Fetching gem metadata from http://rubygems.org/..........
+	Fetching gem metadata from http://rubygems.org/..
+	Using rack (1.5.2) 
+	Installing rack-protection (1.5.0) 
+	Installing tilt (1.3.6) 
+	Installing sinatra (1.4.2) 
+	Using bundler (1.3.5) 
+	Your bundle is complete!
+	Use `bundle show [gemname]` to see where a bundled gem is installed.
 
 If your dependencies require any system packages, you can install those later by specifying a list of custom packages in the Instance configuration or by customizing the deploy script to install your own packages.
 
 #### 2. Use Foreman to manage processes
 
-OpDemand uses [Foreman](http://ddollar.github.com/foreman/) to manage the processes that serve up your application.  Foreman relies on a `Procfile` that lives in the root of your repository.  This is where you define the command(s) used to run your application.  Here is an example `Procfile`:
+Deis relies on a [Foreman](http://ddollar.github.com/foreman/) `Procfile` that lives in the root of your repository.  This is where you define the command(s) used to run your application.  Here is an example `Procfile`:`
 
     web: bundle exec ruby web.rb -p $PORT
 
-This tells OpDemand to run web application workers using the command `ruby web.rb -p $PORT` wrapped in a `bundle exec` (highly recommended).  You can test this locally by running `foreman start`.
+This tells Deis to run `web` workers using the command `ruby web.rb -p $PORT` wrapped in a `bundle exec` (highly recommended). You can test this locally by running `foreman start`.
 
     $ foreman start
     10:06:14 web.1  | started with pid 63945
@@ -79,91 +80,97 @@ OpDemand uses environment variables to manage your application's configuration. 
     require 'sinatra'
     set :port, ENV["PORT"] || 5000
 
-The same is true for external services like databases, caches and queues.  Here is an example of how to connect to a MySQL database using environment variables:
+## Create a new Application
 
-    ActiveRecord::Base.establish_connection(
-      adapter: "mysql2", 
-      host: env["MYSQL_HOST"] || settings.db_host,
-      database: env["MYSQL_DBNAME"] || settings.db_name,
-      username: env["MYSQL_USERNAME"] || settings.db_username,
-      password: env["MYSQL_PASSWORD"] || settings.db_password)
+Per the prerequisites, we assume you have access to an existing Deis formation. If not, please review the Deis [installation instuctions](http://docs.deis.io/en/latest/gettingstarted/installation/).
 
-## Add a Ruby Stack to your Environment
+Use the following command to create an application on an existing Deis formation.
 
-We now have an application that is ready for deployment, along with an [OpDemand environment](http://www.opdemand.com/how-it-works/) that includes [AWS credentials](http://www.opdemand.com/docs/adding-aws-creds/).  Let's add a basic Ruby stack to host our example application:
+	$ deis create --formation=<formationName> --id=<appName>
+	Creating application... done, created marble-original
+	Git remote deis added    
+	If an ID is not provided, one will be auto-generated for you.
 
-* Click the **Add/Discover Services** button
-* Select the **Ruby** stack and press **Save**
+## Deploy your Application
 
-A typical application stack includes:
+Use `git push` to deploy your application.
 
-* An **EC2 Load Balancer** used to route traffic to your EC2 instances
-* An **EC2 Instance** used to host the application behind [Nginx](http://wiki.nginx.org/Main)
-* An **EC2 Security Group** used as a virtual firewall inside EC2
-* An **EC2 Key Pair** used for deployment automation
+	$ git push deis master
+	Counting objects: 75, done.
+	Delta compression using up to 4 threads.
+	Compressing objects: 100% (40/40), done.
+	Writing objects: 100% (75/75), 15.10 KiB, done.
+	Total 75 (delta 30), reused 75 (delta 30)
+	       Ruby/Rack app detected
+	-----> Using Ruby version: ruby-1.9.3
 
-## Deploy the Environment
+Once your application has been deployed, use `deis open` to view it in a browser. To find out more info about your application, use `deis info`.
 
-To deploy this application stack, press the green deploy button on the environment toolbar.
+## Scale your Application
 
-![Deploy your environment](http://www.opdemand.com/wp-content/uploads/2013/03/Screen-Shot-2013-03-27-at-1.04.35-PM.png)
+To scale your application's [Docker](http://docker.io) containers, use `deis scale`.
 
-### Specify Required Configuration
+	$ deis scale web=8
+	Scaling containers... but first, coffee!
+	done in 15s
+	
+	=== marble-original Containers
+	
+	--- web: `bundle exec ruby web.rb -p $PORT`
+	web.1 up 2013-10-25T20:24:14.414Z (rubyFormation-runtime-1)
+	web.2 up 2013-10-25T20:24:51.691Z (rubyFormation-runtime-1)
+	web.3 up 2013-10-25T20:24:51.705Z (rubyFormation-runtime-1)
+	web.4 up 2013-10-25T20:24:51.719Z (rubyFormation-runtime-1)
+	web.5 up 2013-10-25T20:24:51.734Z (rubyFormation-runtime-1)
+	web.6 up 2013-10-25T20:24:51.750Z (rubyFormation-runtime-1)
+	web.7 up 2013-10-25T20:24:51.768Z (rubyFormation-runtime-1)
+	web.8 up 2013-10-25T20:24:51.788Z (rubyFormation-runtime-1)
 
-OpDemand provides reasonable defaults, but you'll want to review a few configuration values:
+## Configure your Application
 
-* Check the default *Regions*, *Zones* and *Instance Types*
-* Add your public key to *SSH Authorized Keys* so you can SSH into Instances
-* Make sure the *Repository URL* and *Repository Revision* are correct for your application
-* If your app is in a private GitHub repository, click **Create Deploy Key** to have OpDemand install a secure deploy key using the GitHub API
+Deis applications are configured using environment variables. The example application includes a special `POWERED_BY` variable to help demonstrate how you would provide application-level configuration. 
 
-Once you've reviewed and modified the required configuration, press **Save & Continue** to initiate your first deploy.
+	$ curl -s http://yourapp.com
+	Powered by Deis
+	$ deis config:set POWERED_BY=Ruby
+	=== marble-original
+	POWERED_BY: Ruby
+	$ curl -s http://yourapp.com
+	Powered by Ruby
 
-### Wait until Active
+This method is also how you connect your application to backing services like databases, queues and caches.
 
-OpDemand will now orchestrate the deployment of your application stack to your cloud providers.  Once the environment has an **Active** status, your application should be good to go.
+To experiment in your application environment, use `deis run` to execute one-off commands against your application.
 
-This can take a while depending on the cloud provider, service types, instance sizes and the build/deploy scripts (are you compiling something?).  While you wait, grab some coffee and:
+	$ deis run ls -la
+	total 68
+	drwxr-xr-x  6 root root 4096 Oct 25 20:24 .
+	drwxr-xr-x 57 root root 4096 Oct 25 20:27 ..
+	drwxr-xr-x  2 root root 4096 Oct 25 20:23 .bundle
+	-rw-r--r--  1 root root    5 Oct 25 20:23 .gitignore
+	drwxr-xr-x  2 root root 4096 Oct 25 20:24 .profile.d
+	-rw-r--r--  1 root root  135 Oct 25 20:24 .release
+	-rw-r--r--  1 root root   11 Oct 25 20:23 .ruby-version
+	-rw-r--r--  1 root root   67 Oct 25 20:23 Gemfile
+	-rw-r--r--  1 root root  277 Oct 25 20:23 Gemfile.lock
+	-rw-r--r--  1 root root  553 Oct 25 20:23 LICENSE
+	-rw-r--r--  1 root root   37 Oct 25 20:23 Procfile
+	-rw-r--r--  1 root root 9165 Oct 25 20:23 README.md
+	drwxr-xr-x  2 root root 4096 Oct 25 20:23 bin
+	drwxr-xr-x  5 root root 4096 Oct 25 20:23 vendor
+	-rw-r--r--  1 root root  127 Oct 25 20:23 web.rb
 
-* Watch the Key Pairs and Security Groups build, deploy and become **Active**
-* Watch the Instances build, deploy and become **Active** (this takes a few minutes, check out the real-time log feedback)
-* Watch the Load Balancers build, deploy and become **Active**
+## Troubleshoot your Application
 
-### Troubleshooting
+To view your application's log output, including any errors or stack traces, use `deis logs`.
 
-It's not uncommon to experience errors or warnings during deploys.  If you get stuck on an error you can click **Report This** to [open a ticket](https://desk.opdemand.com/) with the OpDemand help desk.
-
-* For *Cloud Provider Errors*, check the service's primary configuration fields
-* For *SSH Key Warnings*, make sure Deployment configuration sections contain valid SSH private keys
-* For *SSH Return Code Warnings*, SSH into the instance and make sure the Build & Deploy scripts execute successfully
-* For *Other Warnings*, try re-deploying to bring the service back to active status
-
-###### SSH Access
-
-Click the **SSH** button on the toolbar to SSH into Instances.  If you didn't add your SSH key initially, you can always modify SSH keys later, save the new configuration and **Deploy** again to update the Instance.
-
-![SSH into your Instance](http://www.opdemand.com/wp-content/uploads/2013/03/Screen-Shot-2013-03-27-at-1.10.19-PM.png)
-
-## Access your Application
-
-Once your application is active, you can access its [published URLs](http://www.opdemand.com/how-it-works/monitor/) on the Environment's **Monitor** tab.  If you're looking at a service that publishes something, you can jump to the published URL in the upper-right corner of the service:
-
-![Access your application](http://www.opdemand.com/wp-content/uploads/2013/03/Screen-Shot-2013-03-27-at-2.43.09-PM.png)
-
-For the example application you should see: *Powered by OpDemand*
-
-## Update your Application
-
-As you make changes to your application or deployment code:
-
-1. **Push** the code to GitHub
-2. **Deploy** the environment
-
-OpDemand will use the latest environment configuration to update cloud services, SSH into instances, pull down source code from GitHub, install dependencies, re-package your application and restart services where necessary.
-
-If you want to integrate OpDemand into your command-line workflow, `opdemand deploy` can also be used to trigger deploys.  See [Using the OpDemand Command-Line Interface](http://www.opdemand.com/docs/) more details.
+    $ deis logs
+    <show output>
 
 ## Additional Resources
 
-* [OpDemand Documentation](http://www.opdemand.com/docs/)
-* [OpDemand - How It Works](https://www.opdemand.com/how-it-works/)
+* [Get Deis](http://deis.io/get-deis/)
+* [GitHub Project](https://github.com/opdemand/deis)
+* [Documentation](http://docs.deis.io/)
+* [Blog](http://deis.io/blog/)
+ 
