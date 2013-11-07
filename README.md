@@ -163,7 +163,10 @@ Deis applications are configured using environment variables. The example applic
 To view your application's log output, including any errors or stack traces, use `deis logs`.
 
     $ deis logs
-    <show output>
+	Nov  7 17:02:44 ip-172-31-11-82 stable-nautilus[web.1]: [2013-11-07 17:02:44] INFO  WEBrick 1.3.1
+	Nov  7 17:02:44 ip-172-31-11-82 stable-nautilus[web.1]: [2013-11-07 17:02:44] INFO  ruby 1.9.3 (2013-06-27) [x86_64-linux]
+	Nov  7 17:02:44 ip-172-31-11-82 stable-nautilus[web.1]: == Sinatra/1.4.2 has taken the stage on 10004 for production with backup from WEBrick
+	Nov  7 17:02:44 ip-172-31-11-82 stable-nautilus[web.1]: [2013-11-07 17:02:44] INFO  WEBrick::HTTPServer#start: pid=15 port=10004
 
 ## Additional Resources
 
