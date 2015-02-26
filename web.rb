@@ -6,5 +6,4 @@ get '/' do
   whom = ENV["POWERED_BY"] || "Deis!"
   container = `hostname`.strip || "unknown"
   "Powered by " + whom + "\nRunning on container ID " + container + "\n"
-
 end
