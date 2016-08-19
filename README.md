@@ -23,16 +23,18 @@ Starting build... but first, coffee!
        Running: bundle install --without development:test --path vendor/bundle --binstubs vendor/bundle/bin -j4 --deployment
        Fetching gem metadata from http://rubygems.org/..........
        Fetching version metadata from http://rubygems.org/..
-       Using bundler 1.11.2
-       Installing rack 1.6.4
        Installing tilt 2.0.5
+       Installing puma 3.6.0 with native extensions
+       Installing rack 1.6.4
+       Using bundler 1.11.2
        Installing rack-protection 1.5.3
        Installing sinatra 1.4.7
-       Bundle complete! 1 Gemfile dependency, 5 gems now installed.
+       Bundle complete! 2 Gemfile dependencies, 6 gems now installed.
        Gems in the groups development and test were not installed.
        Bundled gems are installed into ./vendor/bundle.
-       Bundle completed (2.04s)
+       Bundle completed (4.87s)
        Cleaning up the bundler cache.
+-----> Writing config/database.yml to read from DATABASE_URL
 
 -----> Discovering process types
        Procfile declares types -> web
