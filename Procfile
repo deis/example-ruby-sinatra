@@ -1,1 +1,1 @@
-web: bundle exec ruby web.rb -p ${PORT:-5000}
+web: bundle exec puma -C config/puma.rb
