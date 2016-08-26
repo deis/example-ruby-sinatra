@@ -52,7 +52,7 @@ To ssh://git@deis-builder.deis.rocks:2222/benign-quilting.git
  * [new branch]      master -> master
 $ curl http://benign-quilting.deis.rocks
 Powered by Deis
-Running on container ID benign-quilting-web-1803317222-dlfom
+Release v2 on benign-quilting-web-2270916958-efwx3
 ```
 
 ## Additional Resources
